@@ -35,19 +35,9 @@ class Purge extends Command
      */
     protected $description = 'Purge files/tags from CloudFlare\'s cache.';
 
-    /**
-     * CloudFlare API client.
-     *
-     * @var \Sebdesign\ArtisanCloudflare\Client
-     */
-    private $client;
+    private Client $client;
 
-    /**
-     * API item identifier tags.
-     *
-     * @var \Illuminate\Support\Collection<string,\Sebdesign\ArtisanCloudflare\Zone>
-     */
-    private $zones;
+    private Collection $zones;
 
     /**
      * Purge constructor.
@@ -66,10 +56,11 @@ class Purge extends Command
     /**
      * Execute the console command.
      *
-     * @param  \Sebdesign\ArtisanCloudflare\Client  $client
+     * @param Client $client
+     *
      * @return int
      */
-    public function handle(Client $client)
+    public function handle(Client $client): int
     {
         $this->client = $client;
 
@@ -90,15 +81,7 @@ class Purge extends Command
         return $this->getExitCode($results);
     }
 
-    /**
-     * Apply the paremeters for each zone.
-     *
-     * Use the config for each zone, unless options are passed in the command.
-     *
-     * @param  \Illuminate\Support\Collection<string,\Sebdesign\ArtisanCloudflare\Zone>  $zones
-     * @return \Illuminate\Support\Collection<string,\Sebdesign\ArtisanCloudflare\Zone>
-     */
-    private function applyParameters($zones)
+    private function applyParameters(Collection $zones): Collection
     {
         $defaults = array_filter([
             'files' => $this->option('file'),
@@ -118,24 +101,24 @@ class Purge extends Command
     /**
      * Execute the purging operations and return each result.
      *
-     * @param  \Illuminate\Support\Collection<string,\Sebdesign\ArtisanCloudflare\Zone>  $zones
-     * @return \Illuminate\Support\Collection<string,\Sebdesign\ArtisanCloudflare\Zone>
+     * @param Collection $zones
+     *
+     * @return Collection
      */
-    private function purge($zones)
+    private function purge(Collection $zones)
     {
-        $results = $this->client->purge($zones);
-
-        return $results->reorder($zones->keys());
+        return $this->client->purge($zones)->reorder($zones->keys());
     }
 
     /**
      * Display a table with the results.
      *
-     * @param  \Illuminate\Support\Collection<string,\Sebdesign\ArtisanCloudflare\Zone>  $zones
-     * @param  \Illuminate\Support\Collection<string,\Sebdesign\ArtisanCloudflare\Zone>  $results
+     * @param Collection  $zones
+     * @param  Collection  $results
+     *
      * @return void
      */
-    private function displayResults($zones, $results)
+    private function displayResults($zones, $results): void
     {
         $headers = ['Status', 'Zone', 'Files', 'Tags', 'Hosts', 'Errors'];
 
@@ -196,7 +179,7 @@ class Purge extends Command
      * @param  array  $items
      * @return string
      */
-    private function formatItems(array $items)
+    private function formatItems(array $items): string
     {
         return implode("\n", $items);
     }
@@ -207,9 +190,9 @@ class Purge extends Command
      * @param  array[]  $errors
      * @return string[]
      */
-    private function formatErrors(array $errors)
+    private function formatErrors(array $errors): array
     {
-        return array_map(function (array $error) {
+        return array_map(static function (array $error) {
             if (isset($error['code'])) {
                 return "<fg=red>{$error['code']}: {$error['message']}</>";
             }
@@ -221,9 +204,9 @@ class Purge extends Command
     /**
      * Get the zone identifier from the input argument or the configuration.
      *
-     * @return \Illuminate\Support\Collection<string,\Sebdesign\ArtisanCloudflare\Zone>
+     * @return Collection
      */
-    private function getZones()
+    private function getZones(): Collection
     {
         if (! $zone = $this->argument('zone')) {
             return $this->zones;
@@ -243,10 +226,11 @@ class Purge extends Command
     /**
      * Return 1 if all successes are false, otherwise return 0.
      *
-     * @param  \Illuminate\Support\Collection<string,\Sebdesign\ArtisanCloudflare\Zone>  $results
+     * @param  Collection  $results
+     *
      * @return int
      */
-    private function getExitCode($results)
+    private function getExitCode($results): int
     {
         return (int) $results->filter(function (Zone $zone) {
             return $zone->get('success');

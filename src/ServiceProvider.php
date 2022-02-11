@@ -3,6 +3,7 @@
 namespace Sebdesign\ArtisanCloudflare;
 
 use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\RequestOptions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 
@@ -11,7 +12,7 @@ class ServiceProvider extends IlluminateServiceProvider
     /**
      * Bootstrap the application services.
      */
-    public function boot()
+    public function boot(): void
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
@@ -20,7 +21,7 @@ class ServiceProvider extends IlluminateServiceProvider
         }
     }
 
-    public function register()
+    public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../config/cloudflare.php', 'cloudflare');
 
@@ -29,7 +30,7 @@ class ServiceProvider extends IlluminateServiceProvider
         $this->registerMacros();
     }
 
-    protected function registerClient()
+    protected function registerClient(): void
     {
         $this->app->bind(Client::class, function () {
             return new Client(
@@ -39,7 +40,7 @@ class ServiceProvider extends IlluminateServiceProvider
         });
     }
 
-    protected function bootGuzzleClient()
+    protected function bootGuzzleClient(): GuzzleClient
     {
         $config = $this->app['config']['cloudflare'];
 
@@ -52,11 +53,11 @@ class ServiceProvider extends IlluminateServiceProvider
 
         return new GuzzleClient([
             'base_uri' => Client::BASE_URI,
-            \GuzzleHttp\RequestOptions::HEADERS => $authorization,
+            RequestOptions::HEADERS => $authorization,
         ]);
     }
 
-    protected function registerCommands()
+    protected function registerCommands(): void
     {
         $this->app->bind(Commands\Cache\Purge::class, function () {
             return new Commands\Cache\Purge(
@@ -69,7 +70,7 @@ class ServiceProvider extends IlluminateServiceProvider
         ]);
     }
 
-    protected function registerMacros()
+    protected function registerMacros(): void
     {
         /*
          * Transpose with keys.
@@ -120,7 +121,7 @@ class ServiceProvider extends IlluminateServiceProvider
      *
      * @return bool
      */
-    public function isDeferred()
+    public function isDeferred(): bool
     {
         return true;
     }
@@ -130,7 +131,7 @@ class ServiceProvider extends IlluminateServiceProvider
      *
      * @return array
      */
-    public function provides()
+    public function provides(): array
     {
         return [
             Client::class,

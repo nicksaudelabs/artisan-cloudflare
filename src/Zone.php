@@ -6,15 +6,14 @@ use JsonSerializable;
 
 class Zone implements JsonSerializable
 {
-    /** @var array */
-    private $parameters;
+    private array $parameters;
 
     public function __construct(array $parameters = [])
     {
         $this->parameters = $parameters;
     }
 
-    public function replace(array $parameters)
+    public function replace(array $parameters): void
     {
         $this->parameters = $parameters;
     }
@@ -30,10 +29,6 @@ class Zone implements JsonSerializable
 
     public function get($key, $default = null)
     {
-        if (isset($this->parameters[$key])) {
-            return $this->parameters[$key];
-        }
-
-        return $default;
+        return $this->parameters[$key] ?? $default;
     }
 }
